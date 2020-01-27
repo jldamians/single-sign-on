@@ -1,0 +1,38 @@
+{
+  "name": "sso-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jldamians/sso-server.git"
+  },
+  "keywords": [
+    "sso"
+  ],
+  "author": "jldamians",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jldamians/sso-server/issues"
+  },
+  "homepage": "https://github.com/jldamians/sso-server#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.4",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.0.1",
+    "ejs-mate": "^3.0.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "hashids": "^1.1.4",
+    "http-status-codes": "^1.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.9.1",
+    "uuid": "^3.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
