@@ -1,24 +1,23 @@
 "use strict";
 
 const path = require("path");
-
+const cors = require("cors");
 const logger = require("morgan");
-
 const express = require("express");
-
 const session = require("express-session");
-
 const cookieParser = require("cookie-parser");
 
 const { config } = require("./config");
 
 const routes = require("./routes");
 
+// initializations
+
 const app = express();
 
-app.engine("ejs", require("ejs-mate"));
+// settings
 
-// app settings
+app.engine("ejs", require("ejs-mate"));
 
 app.set("json spaces", 2);
 
@@ -28,11 +27,13 @@ app.set("view engine", "ejs");
 
 app.set("views", path.join(__dirname, "/views"));
 
-// load middlewares
+// middlewares
 
-/*app.use("/imgs", express.static(
-  path.join(__dirname, "/public/imgs")
-));*/
+// To enable HTTP cookies.
+// Add header "Access-Control-Allow-Credentials: true".
+app.use(cors({
+  credentials: true,
+}));
 
 app.use("/static", express.static(
   path.join(__dirname, "/public")
@@ -55,14 +56,6 @@ app.use(session({
 
 app.use(cookieParser());
 
-app.use((req, res, next) => {
-  console.log('estas son las sesiones del servidor =>');
-
-  console.log(req.session);
-
-  next();
-});
-
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
@@ -71,7 +64,7 @@ app.use(express.json());
 
 app.use(logger("dev"));
 
-// load routes
+// routes
 
 app.use("/", routes);
 
