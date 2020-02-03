@@ -3,9 +3,9 @@
 require("dotenv").config();
 
 const config = {
-  publicKey,
+  appPort: process.env.APP_PORT,
   ssoServerUrl: process.env.SSO_SERVER_URL,
-  jwtPublicKeyFile: process.env.JWT_PUBLIC_KEY_FILE,
+  jwtPublicKeyPath: process.env.JWT_PUBLIC_KEY_PATH,
 };
 
 module.exports = { config };
