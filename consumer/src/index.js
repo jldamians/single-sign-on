@@ -7,7 +7,7 @@ const express = require("express");
 const cookie = require("cookie-parser");
 const session = require("express-session");
 
-const { isAuthenticated } = require("./controllers");
+const { isAuthenticated, callback } = require("./controllers");
 
 // initializations
 
@@ -55,6 +55,8 @@ app.use(express.json());
 app.use(logger("dev"));
 
 // routes
+
+app.get("/callback", callback);
 
 app.get("/", isAuthenticated, function(req, res, next) {
   res.render("me", {
