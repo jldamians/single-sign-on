@@ -1,7 +1,6 @@
 "use strict";
 
 const fs = require("fs");
-const path = require("path");
 const request = require("request");
 const Promise = require("bluebird");
 const jwt = require("jsonwebtoken");
@@ -9,23 +8,25 @@ const jwt = require("jsonwebtoken");
 const { config } = require("../config");
 
 exports.jwtVerify = function(accessToken) {
-  const options = { algorithms: 'RS256' };
+  const options = { algorithm: 'RS256' };
 
   const decoded = jwt.verify(accessToken, getCert(), options);
+
+  return decoded;
 }
 
 function getCert() {
-  const cert = fs.readFileSync(config.jwtPublicKeyFile);
+  const cert = fs.readFileSync(config.jwtPublicKeyPath);
 
   return cert;
 }
 
 exports.authorizeUrl = function() {
-  return path.join(config.ssoServerUrl, "/authorize");
+  return `${config.ssoServerUrl}/authorize`;
 }
 
 exports.tokenUrl = function() {
-  return path.join(config.ssoServerUrl, "/token");
+  return `${config.ssoServerUrl}/token`;
 }
 
 exports.btoa = function(key, secret) {
