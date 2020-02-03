@@ -2,6 +2,8 @@
 
 const fs = require("fs");
 const path = require("path");
+const request = require("request");
+const Promise = require("bluebird");
 const jwt = require("jsonwebtoken");
 
 const { config } = require("../config");
@@ -28,4 +30,28 @@ exports.tokenUrl = function() {
 
 exports.btoa = function(key, secret) {
   return new Buffer(`${key}:${secret}`).toString("base64");
+}
+
+exports.getAccessToken = function(url, code, auth) {
+  const options = {
+    url,
+    body: {
+      code,
+      grant_type: "authorization_code",
+    },
+    json: true,
+    headers: {
+      Authorization: auth,
+    }
+  };
+
+  return new Promise(function(resolve, reject) {
+    request.post(options, function(error, response, body) {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(body);
+      }
+    });
+  });
 }
