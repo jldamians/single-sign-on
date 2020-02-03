@@ -1,11 +1,14 @@
 "use strict";
 
 const cors = require("cors");
+const path = require("path");
 const logger = require("morgan");
 const engine = require("ejs-mate");
 const express = require("express");
 const cookie = require("cookie-parser");
 const session = require("express-session");
+
+const { config } = require("./config");
 
 const { isAuthenticated, callback } = require("./controllers");
 
@@ -19,7 +22,7 @@ app.engine("ejs", engine);
 
 app.set("json spaces", 2);
 
-app.set("port", 80);
+app.set("port", config.appPort);
 
 app.set("view engine", "ejs");
 

@@ -21,7 +21,7 @@ app.engine("ejs", require("ejs-mate"));
 
 app.set("json spaces", 2);
 
-app.set("port", config.port);
+app.set("port", config.appPort);
 
 app.set("view engine", "ejs");
 
