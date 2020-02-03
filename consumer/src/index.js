@@ -41,13 +41,13 @@ app.use("/static", express.static(
 app.use(cookie());
 
 app.use(session({
-  name: "app.session.web",
-  secret: "9XgjWnYOLQduSof0KR3yzJHik6CTa8cV",
+  name: config.cookieName,
+  secret: config.cookieSecret,
   resave: false,
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
-    maxAge: 1000 * 60 * 5,
+    maxAge: Number.parseInt(config.cookieExpiration),
   },
 }));
 
@@ -70,6 +70,6 @@ app.get("/", isAuthenticated, function(req, res, next) {
 
 // starting the server
 
-app.listen(80, function() {
-  console.log("Listening on port 80");
+app.listen(app.get('port'), () => {
+  console.log(`Server listening on port:${app.get('port')}`);
 });

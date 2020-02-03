@@ -50,7 +50,7 @@ app.use(session({
   cookie: {
     httpOnly: true,
     // configurar como "null" si quiere que la sesión permanesca viva
-    maxAge: parseInt(config.cookieExpiration),
+    maxAge: Number.parseInt(config.cookieExpiration),
   },
 }));
 
