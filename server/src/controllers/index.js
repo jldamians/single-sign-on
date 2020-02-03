@@ -3,7 +3,7 @@
 const querystring = require('querystring');
 const HttpStatus = require('http-status-codes');
 
-const { uuid, origin } = require("../utils");
+const { uuid, origin, atob, token } = require("../utils");
 
 const { apps, users, tokens } = require("../models");
 
@@ -20,7 +20,7 @@ async function getApplicationInfo({client_id, redirect_uri}) {
     throw new Error('Debe enviar el parámetro redirect_uri');
   }
 
-  const information = await apps.findOne({ 
+  const information = await apps.findOne({
     clientID: client_id,
   });
 
@@ -59,11 +59,11 @@ async function cachingTokenCode(params) {
   await newToken.save();
 }
 
-exports.authenticate = async (req, res, next) => {
+exports.toLogin = async (req, res, next) => {
   // login
 
   let app;
-  
+
   try {
     app = await getApplicationInfo(req.query);
   } catch ({message}) {
@@ -77,26 +77,26 @@ exports.authenticate = async (req, res, next) => {
   } catch ({message}) {
     return res.status(HttpStatus.UNAUTHORIZED).json({ message });
   }
-  
+
   /*
     Tras haber solicitado autorización al propietario del recurso,
     el cliente deberá recibir una "concesión de autorización" desde
     servidor de autorización
 
-    La concesión (código de autorización) se obtiene 
-    utilizando un servidor de autorización como intermediario 
+    La concesión (código de autorización) se obtiene
+    utilizando un servidor de autorización como intermediario
     entre el cliente y el propietario del recurso
-  
-    La concesión es una credencial que representa la 
-    autorización del propietario para acceder 
-    a sus recursos protegidos, y deberá ser utilizado 
+
+    La concesión es una credencial que representa la
+    autorización del propietario para acceder
+    a sus recursos protegidos, y deberá ser utilizado
     por el cliente para obtener un "token de acceso"
   */
- 
+
   // session
- 
-  req.session.user = user._id;
- 
+
+  req.session.user = user._id.toHexString();
+
   // authorization grant
 
   const tokenCode = uuid();
@@ -106,7 +106,7 @@ exports.authenticate = async (req, res, next) => {
   try {
     await cachingTokenCode({
       client_id,
-      user_id: user._id,
+      user_id: user._id.toHexString(),
       audience: app.name,
       token_code: tokenCode,
     });
@@ -127,13 +127,13 @@ exports.authenticate = async (req, res, next) => {
   return res.redirect(`${redirect_uri}?${query}`);
 };
 
-exports.login = async (req, res) => {
-  const { 
+exports.toAuthorize = async (req, res) => {
+  const {
     state, client_id, redirect_uri, response_type,
   } = req.query;
-  
+
   let application;
-  
+
   try {
     application = await getApplicationInfo(req.query);
   } catch ({message}) {
@@ -170,16 +170,38 @@ exports.login = async (req, res) => {
   });
 }
 
-exports.verify = async (req, res) => {debugger;
-  const authorization = req.headers["authorization"];
+exports.getAccessToken = async (req, res) => {
+  const authorization = req.headers["authorization"]; // const auth = req.get("authorization");
 
-  const auth = req.get("authorization");
+  const [basic, auth] = authorization.split(" ");
 
-  debugger;
-}
+  const [client_id, client_secret] = atob(auth).split(":");
 
-exports.logout = (req, res) => {
-  req.session.destroy();
+  const { code, grant_type } = req.body;
 
-  res.send("Logout success!");
+  const authCode = await tokens.findOne({ token_code: code });
+
+  if (!authCode) {
+    return res.status(HttpStatus.UNAUTHORIZED).json({
+      message: "El código de autorización (concesión) no existe"
+    });
+  }
+
+  if (authCode.client_id !== client_id) {
+    return res.status(HttpStatus.UNAUTHORIZED).json({
+      message: "El código de autorización (concesión) es incorrecto"
+    });
+  }
+
+  const accessToken = token({
+    jti:authCode._id.toHexString(),
+    sub: authCode.user_id,
+    aud: authCode.audience,
+  });
+
+
+  res.status(HttpStatus.OK).json({
+    access_token: accessToken,
+    token_type: 'bearer',
+  });
 }

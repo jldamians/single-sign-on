@@ -3,30 +3,25 @@
 const express = require("express");
 
 const ctrl = require("../controllers");
-
-const { users } = require("../models");
-
 const appsRoute = require("../routes/apps");
 const signupRoute = require("../routes/signup");
 
 const router = express.Router();
 
 router
-  .route("/login")
-  .get(ctrl.login)
-  .post(ctrl.authenticate)
-  ;
+  .route("/authorize")
+  .get(ctrl.toAuthorize)
+  .post(ctrl.toLogin);
 
 router
-  .route("/verify")
-  .post(ctrl.verify)
-  ;
+  .route("/token")
+  .post(ctrl.getAccessToken);
 
-router
+/*router
   .route("/logout")
   .get(ctrl.logout)
   .post(ctrl.logout)
-  ;
+  ;*/
 
 router
   .use(appsRoute)

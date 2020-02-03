@@ -1,7 +1,6 @@
 "use strict";
 
 const url = require("url");
-const axios = require("axios");
 const crypto = require("crypto");
 const querystring = require("querystring");
 
@@ -37,7 +36,11 @@ exports.isAuthenticated = function(req, res, next) {
 
     res.cookie("auth_state", state, { httpOnly: true });
 
-    return res.redirect(`${utils.authorizeUrl}?${qs}`);
+    const uri = utils.authorizeUrl();
+
+    const redirect = `${uri}?${qs}`;
+
+    return res.redirect(redirect);
   }
 
   next();
@@ -80,15 +83,15 @@ exports.callback = async function(req, res, next) {
   let decoded;
 
   try {
-    const { access_token, token_type } = response.data;
+    const { access_token, token_type } = response;
 
     decoded = utils.jwtVerify(access_token);
   } catch ({message}) {
-    return res.status(200).json({ message: `Error al verificar el token de acceso: ${message}` });
+    return res.status(400).json({ message: `Error al verificar el token de acceso: ${message}` });
   }
 
   // TODO: revisar la data que se salva en sesión
   req.session.user = decoded;
 
-  return res.redirect(url.parse(req.url).pathname);
+  return res.redirect("/");
 }
